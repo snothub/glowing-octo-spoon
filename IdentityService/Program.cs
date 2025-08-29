@@ -4,6 +4,7 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using IdentityService;
+using IdentityService.Pages;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
@@ -65,19 +66,20 @@ builder.Services.AddAuthentication()
     .AddCookie(DomainConstants.IdsrvDefaultAuthenticationScheme, options => {
         options.SlidingExpiration = true;
     })
-    // .AddCookie(IdentityServerConstants.ExternalCookieAuthenticationScheme, options => {
-    //     options.Cookie.Name = IdentityServerConstants.ExternalCookieAuthenticationScheme;
-    //     options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
-    // })
+    .AddCookie(DomainConstants.ExternalScheme, options => {
+        options.Cookie.Name = DomainConstants.ExternalScheme;
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+    })
     .AddOpenIdConnect(DomainConstants.AdAuthenticationScheme, "Microsoft Entra ID", options =>
     {
-        options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+        options.SignInScheme = DomainConstants.ExternalScheme;
         options.Authority = DomainConstants.CAuth;
         options.TokenValidationParameters = new TokenValidationParameters { ValidateIssuer = false };
         options.ClientId = DomainConstants.Cid;
-        options.ClientSecret = $"{DomainConstants.Cs}.{DomainConstants.Cs2}.{DomainConstants.Cs3}";
-        options.ResponseType = "code";
+        options.ClientSecret = $"{DomainConstants.Cs}";
+        options.ResponseType = "id_token";
         options.SaveTokens = true;
+        options.Scope.Add("openid");
         options.Scope.Add("user.read");
         options.CallbackPath = new PathString("/aad-callback");
     });

@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace IdentityService.Controllers
 {
@@ -68,28 +70,29 @@ namespace IdentityService.Controllers
         public async Task<IActionResult> Callback()
         {
             // read external identity from the temporary cookie
-            var result = await HttpContext.AuthenticateAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
-            if (result?.Succeeded != true)
+            var result = await HttpContext.AuthenticateAsync(DomainConstants.ExternalScheme);
+            if (result.Succeeded != true)
             {
+                _logger.LogWarning("External login failed: {Result}", JsonSerializer.Serialize(result));
                 throw new Exception("External authentication error");
             }
+            _logger.LogInformation("External login success");
 
-            if (_logger.IsEnabled(LogLevel.Debug))
-            {
-                var externalClaims = result.Principal.Claims.Select(c => $"{c.Type}: {c.Value}");
-                _logger.LogDebug("External claims: {@claims}", externalClaims);
-            }
+            var externalClaims = result.Principal.Claims.Select(c => $"{c.Type}: {c.Value}");
+            _logger.LogDebug("External claims: {@claims}", JsonSerializer.Serialize(externalClaims));
 
             // lookup our user and external provider info
             var (user, provider, providerUserId, claims) = FindUserFromExternalProvider(result);
             if (user == null)
             {
+                _logger.LogDebug("Provision user");
                 // this might be where you might initiate a custom workflow for user registration
                 // in this sample we don't show how that would be done, as our sample implementation
                 // simply auto-provisions new external user
                 user = AutoProvisionUser(provider, providerUserId, claims);
             }
 
+            _logger.LogDebug("User: Subj:{Subj}, ProvSubj:{PSubj}, UName: {UName}, Claims: {Claims}", user.SubjectId, user.ProviderSubjectId, user.Username, user.Claims.Select(c => $"{c.Type}: {c.Value}"));
             // this allows us to collect any additional claims or properties
             // for the specific protocols used and store them in the local auth cookie.
             // this is typically used to store data needed for signout from those protocols.
@@ -104,11 +107,13 @@ namespace IdentityService.Controllers
                 IdentityProvider = provider,
                 AdditionalClaims = additionalLocalClaims
             };
+            _logger.LogDebug("localSignInProps: {@SignInProps}", JsonSerializer.Serialize(localSignInProps));
 
             await HttpContext.SignInAsync(isuser, localSignInProps);
 
+            _logger.LogDebug("Deleting temporary cookie");
             // delete temporary cookie used during external authentication
-            await HttpContext.SignOutAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
+            await HttpContext.SignOutAsync(DomainConstants.ExternalScheme);
 
             // retrieve return URL
             var returnUrl = result.Properties.Items["returnUrl"] ?? "~/";
@@ -123,6 +128,7 @@ namespace IdentityService.Controllers
         private (TestUser user, string provider, string providerUserId, IEnumerable<Claim> claims) FindUserFromExternalProvider(AuthenticateResult result)
         {
             var externalUser = result.Principal;
+            _logger.LogDebug("Getting external user");
 
             // try to determine the unique id of the external user (issued by the provider)
             // the most common claim type for that are the sub claim and the NameIdentifier
@@ -138,8 +144,10 @@ namespace IdentityService.Controllers
             var provider = result.Properties.Items["scheme"];
             var providerUserId = userIdClaim.Value;
 
+            _logger.LogDebug("Looking for external user {Id} with provider {Pro}", providerUserId, provider);
             // find external user
             var user = _users.FindByExternalProvider(provider, providerUserId);
+            _logger.LogInformation("User detected: {User}", user?.Username ?? user?.SubjectId);
 
             return (user, provider, providerUserId, claims);
         }

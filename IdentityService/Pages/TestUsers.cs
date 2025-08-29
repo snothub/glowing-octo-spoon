@@ -1,13 +1,13 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.IdentityServer;
-using Duende.IdentityServer.Test;
 using System.Security.Claims;
 using System.Text.Json;
 using Duende.IdentityModel;
+using Duende.IdentityServer;
+using Duende.IdentityServer.Test;
 
-namespace IdentityService;
+namespace IdentityService.Pages;
 
 public static class TestUsers
 {
@@ -90,6 +90,35 @@ public static class TestUsers
                     SubjectId = "3",
                     Username = "large",
                     Password = "large",
+                    Claims =
+                    {
+                        new Claim(JwtClaimTypes.Name, "Large Larger"),
+                        new Claim(JwtClaimTypes.GivenName, "Large"),
+                        new Claim(JwtClaimTypes.FamilyName, "Medium"),
+                        new Claim(JwtClaimTypes.Email, "large@email.com"),
+                        new Claim(JwtClaimTypes.EmailVerified, "true", ClaimValueTypes.Boolean),
+                        new Claim(JwtClaimTypes.PhoneNumber, "+46-708-123456"),
+                        new Claim(JwtClaimTypes.PhoneNumberVerified,"true"),
+                        new Claim(JwtClaimTypes.WebSite, "http://bob.com"),
+                        new Claim(JwtClaimTypes.Address, JsonSerializer.Serialize(largeAddress), IdentityServerConstants.ClaimValueTypes.Json),
+              
+                    
+                        //custom claims
+			            new Claim("employment_start","2019-01-02"),
+                        new Claim("seniority","Senior" + new string('x', 4500)),
+                        new Claim("contractor","no"),
+                        new Claim("role","ceo"),
+                        new Claim("role","finance"),
+                        new Claim("role","developer"),
+                    }
+                },
+                new TestUser
+                {
+                    SubjectId = "4",
+                    Username = "ext",
+                    ProviderName = DomainConstants.AdAuthenticationScheme,
+                    ProviderSubjectId = "1h61joVQi9MXiAUH1X09lJcBoJaApcBW23iCNQOq8CM",
+                    Password = "ext",
                     Claims =
                     {
                         new Claim(JwtClaimTypes.Name, "Large Larger"),

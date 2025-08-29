@@ -55,11 +55,11 @@ internal class Program
             options.Scope.Add("profile");
             options.Scope.Add("email");
             options.Scope.Add("employee_info");
-            options.Scope.Add(DomainConstants.DomainPrefix);
+            // options.Scope.Add(DomainConstants.DomainPrefix);
             // options.Scope.Add($"{Constants.DomainPrefix}bonus");
             // options.Scope.Add($"{Constants.DomainPrefix}park");
             // options.Scope.Add($"{Constants.DomainPrefix}member");
-            options.Scope.Add("offline_access");
+            // options.Scope.Add("offline_access");
 
             options.GetClaimsFromUserInfoEndpoint = true;
             options.SaveTokens = true;

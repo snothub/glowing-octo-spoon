@@ -32,6 +32,7 @@ public class DomainCustomAuthorizeRequestValidator : ICustomAuthorizeRequestVali
         var allScopes = (await _resourceStore.FindApiScopesByNameAsync(dataPortScopes)).Select(scope => scope.Name).ToList();
         _logger.LogInformation($"All {DomainConstants.DomainPrefix} scopes: {{Scopes}}", allScopes);
         allScopes.Add("openid");
+        allScopes.Add("profile");
         context.Result.ValidatedRequest.RequestedScopes.Clear();
         context.Result.ValidatedRequest.RequestedScopes.AddRange(allScopes);
         context.Result.ValidatedRequest.Raw["scope"] = string.Join(" ", allScopes);
