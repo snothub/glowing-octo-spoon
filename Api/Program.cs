@@ -21,7 +21,7 @@ builder.Services.AddCors();
 builder.Services.AddAuthentication("token")
     .AddJwtBearer("token", options =>
     {
-        options.Authority = DomainConstants.IdpAuthority;
+        options.Authority = "http://identity";
         options.TokenValidationParameters.ValidateAudience = false;
         options.MapInboundClaims = false;
         options.RequireHttpsMetadata = false;

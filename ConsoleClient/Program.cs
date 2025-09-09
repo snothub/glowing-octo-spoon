@@ -21,7 +21,11 @@ class Program
         Console.ReadLine();
         Console.Clear();
         
-        await cr.CallServiceAsync(token);
+        var resp = await cr.CallServiceAsync(token);
+        Console.WriteLine(resp);
+        
+        Console.ReadLine();
+        Console.Clear();
     }
 
     private static void CreateJwt()

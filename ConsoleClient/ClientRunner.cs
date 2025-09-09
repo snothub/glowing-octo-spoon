@@ -70,7 +70,7 @@ public class ClientRunner
     }
 
     
-    public async Task CallServiceAsync(string token)
+    public async Task<string> CallServiceAsync(string token)
     {
         var client = new HttpClient
         {
@@ -78,6 +78,6 @@ public class ClientRunner
         };
     
         client.SetBearerToken(token);
-        var response = await client.GetStringAsync("api");
+        return await client.GetStringAsync("api");
     }
 }

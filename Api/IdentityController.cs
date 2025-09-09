@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api;
 
-[Route("api")]
+[Route("/api")]
 public class IdentityController : ControllerBase
 {
     private readonly ILogger<IdentityController> _logger;
