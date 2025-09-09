@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
@@ -30,7 +31,7 @@ builder.Services.AddRazorPages();
 var isBuilder = builder.Services.AddIdentityServer(options =>
 {
     options.Authentication.CookieAuthenticationScheme = DomainConstants.IdsrvDefaultAuthenticationScheme;
-    options.IssuerUri = "https://identity";
+    options.IssuerUri = "http://identity";
 
     options.UserInteraction.ConsentUrl = Environment.GetEnvironmentVariable("IDP_CONSENTURL") ?? "http://localhost:8001/consent";
     options.UserInteraction.LoginUrl = Environment.GetEnvironmentVariable("IDP_LOGINURL") ?? "/ui/login";
@@ -49,7 +50,10 @@ var isBuilder = builder.Services.AddIdentityServer(options =>
     options.KeyManagement.DeleteRetiredKeys = true;
     options.KeyManagement.DataProtectKeys = false;
 
+    options.Preview.StrictClientAssertionAudienceValidation = false;
+
 })
+.AddJwtBearerClientAuthentication()
 .AddTestUsers(TestUsers.Users) 
     ;
 
@@ -59,7 +63,11 @@ isBuilder.Services.AddTransient<ICustomAuthorizeRequestValidator, DomainCustomAu
 // in-memory, code config
 isBuilder.AddInMemoryIdentityResources(Config.IdentityResources);
 isBuilder.AddInMemoryApiScopes(Config.ApiScopes);
-isBuilder.AddInMemoryClients(Config.Clients);
+
+var config = builder.Services.BuildServiceProvider().GetRequiredService<IConfiguration>();
+var clients = Config.Clients.ToList();
+HandleJwt(config, clients);
+isBuilder.AddInMemoryClients(clients);
 isBuilder.Services.AddKeyedTransient<IResourceStore, DomainResourceStore>(DomainConstants.KeyedService);
 
 builder.Services.AddAuthentication()
@@ -109,3 +117,63 @@ app.MapRazorPages()
     .RequireAuthorization();
 
 app.Run();
+
+void HandleJwt(IConfiguration configuration, List<Client> list)
+{
+    Console.WriteLine("JWT Client insertion");
+    var jwtFile = configuration.GetValue<string>("Jwt:Pub");
+    jwtFile = $"/app/{jwtFile}";
+    Console.WriteLine($"Looking for {jwtFile}");
+    if (File.Exists(jwtFile))
+    {
+        var json = File.ReadAllText(jwtFile);
+        var client = new Client
+        {
+            ClientId = DomainConstants.JwtClientId,
+            ClientName = "JWT auth demo client",
+
+            RequirePkce = false,
+            AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
+            RedirectUris = new List<string>()
+            {
+                "https://localhost/signin-oidc",
+                "https://localhost:5001/signin-oidc",
+                "http://localhost/signin-oidc",
+                "http://localhost:5000/signin-oidc"
+            },
+
+            ClientSecrets =
+            {
+                new Secret
+                {
+                    Type = IdentityServerConstants.SecretTypes.JsonWebKey,
+                    Value = json
+                }
+            },
+
+            AllowedScopes =
+            {
+                //Standard scopes
+                IdentityServerConstants.StandardScopes.OpenId,
+                IdentityServerConstants.StandardScopes.Email,
+                IdentityServerConstants.StandardScopes.Profile,
+                IdentityServerConstants.StandardScopes.Phone,
+                IdentityServerConstants.StandardScopes.OfflineAccess,
+                "employee_info",
+                $"{DomainConstants.DomainPrefix}",
+                $"{DomainConstants.DomainPrefix}park",
+                $"{DomainConstants.DomainPrefix}member",
+                $"{DomainConstants.DomainPrefix}bonus",
+                "api"
+            },
+            AccessTokenLifetime = 3600,      //1 hour
+            AlwaysSendClientClaims = true
+        };
+        clients.Add(client);
+        Console.WriteLine($"Client added: {JsonSerializer.Serialize(client)}");
+    }
+    else
+    {
+        Console.WriteLine("JWT Client not found");
+    }
+}

@@ -8,7 +8,6 @@ using IdentityService;
 
 namespace ClientApplication.Controllers
 {
-
     /// <summary>
     /// Identity Source code UI
     /// https://github.com/dotnet/aspnetcore/tree/master/src/Identity
@@ -74,16 +73,19 @@ namespace ClientApplication.Controllers
 
             //To prevent XSS, make sure the token only contains valid base64 characters or ".-"
             //https://en.wikipedia.org/wiki/Base64#Variants_summary_table
-            Regex regex = new Regex(@"^[\w\+\/\=\.-]+$");  //Matches a-z, A-Z, 0-9, including the _ (underscore) character.
+            Regex
+                regex = new Regex(@"^[\w\+\/\=\.-]+$"); //Matches a-z, A-Z, 0-9, including the _ (underscore) character.
 
             if (regex.Match(idToken).Success)
             {
                 ViewData["idToken"] = idToken;
             }
+
             if (regex.Match(accessToken).Success)
             {
                 ViewData["accessToken"] = accessToken;
             }
+
             if (regex.Match(refreshToken).Success)
             {
                 ViewData["refreshToken"] = refreshToken;

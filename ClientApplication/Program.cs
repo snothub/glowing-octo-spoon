@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Text.Json;
 using ClientApplication;
 using IdentityModel;
@@ -113,4 +114,5 @@ internal class Program
 
         app.Run();
     }
+
 }

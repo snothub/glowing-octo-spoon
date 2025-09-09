@@ -1,6 +1,8 @@
-﻿namespace IdentityService;
+﻿using Microsoft.IdentityModel.Tokens;
 
-public  static partial class DomainConstants
+namespace IdentityService;
+
+public static partial class DomainConstants
 {
     public const string DomainPrefix = "agva";
     public const string IdsrvDefaultAuthenticationScheme = "dockerauth";
@@ -8,4 +10,9 @@ public  static partial class DomainConstants
     public const string ExternalScheme = "corp";
    
     public const string KeyedService = "CustomStore";    
+
+    public const string JwtClientId = "jwt.client.sample";    
+    public static JsonWebKey ClientJwk { get; set; }
+    
+    public const string IdpAuthority = "http://localhost:7000";    
 }
