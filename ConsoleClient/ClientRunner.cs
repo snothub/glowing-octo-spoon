@@ -44,17 +44,14 @@ public class ClientRunner
     {
         var now = DateTime.UtcNow;
 
-        var token = new JwtSecurityToken(
-            clientId,
-            audience,
+        var token = new JwtSecurityToken(clientId, audience,
             new List<Claim>
             {
                 new(JwtClaimTypes.JwtId, Guid.NewGuid().ToString()),
                 new(JwtClaimTypes.Subject, clientId),
                 new(JwtClaimTypes.IssuedAt, now.ToEpochTime().ToString(), ClaimValueTypes.Integer64)
             },
-            now,
-            now.AddMinutes(1),
+            now,now.AddMinutes(1),
             new SigningCredentials(DomainConstants.ClientJwk, "RS256")
         )
         {

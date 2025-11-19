@@ -63,6 +63,7 @@ isBuilder.Services.AddTransient<ICustomAuthorizeRequestValidator, DomainCustomAu
 // in-memory, code config
 isBuilder.AddInMemoryIdentityResources(Config.IdentityResources);
 isBuilder.AddInMemoryApiScopes(Config.ApiScopes);
+isBuilder.AddExtensionGrantValidator<TokenExchangeGrantValidator>();
 
 var config = builder.Services.BuildServiceProvider().GetRequiredService<IConfiguration>();
 var clients = Config.Clients.ToList();

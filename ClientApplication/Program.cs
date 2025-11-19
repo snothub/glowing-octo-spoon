@@ -48,7 +48,7 @@ internal class Program
 
             options.ClientId = "localhost-addoidc-client";
 
-            options.ClientSecret = "mysecret";
+            options.ClientSecret = "secret";
             options.ResponseType = "code";
 
             options.Scope.Clear();

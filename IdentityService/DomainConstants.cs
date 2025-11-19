@@ -14,5 +14,6 @@ public static partial class DomainConstants
     public const string JwtClientId = "jwt.client.sample";    
     public static JsonWebKey ClientJwk { get; set; }
     
-    public const string IdpAuthority = "http://localhost:7000";    
+    public const string IdpAuthority = "http://localhost:7000";
+    public static string SigningJwk { get; set; }
 }

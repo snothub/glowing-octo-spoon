@@ -15,6 +15,7 @@
 temp/
 idui/dist/
 **/DomainConstants.Local.cs
+CLAUDE.md
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
