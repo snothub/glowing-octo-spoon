@@ -55,6 +55,7 @@ var isBuilder = builder.Services.AddIdentityServer(options =>
 })
 .AddJwtBearerClientAuthentication()
 .AddTestUsers(TestUsers.Users) 
+.AddServerSideSessions()
     ;
 
 isBuilder.Services.AddTransient<IReturnUrlParser, OidcReturnUrlParser>();

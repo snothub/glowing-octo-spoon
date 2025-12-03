@@ -1,3 +1,6 @@
+# docker compose build client --no-cache; docker compose up -d --force-recreate client
+# docker compose build identity; docker compose up -d --force-recreate identity
+
 services:
   client:
     build:

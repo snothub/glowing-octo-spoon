@@ -18,13 +18,19 @@ namespace ClientApplication.Controllers
     {
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task Login()
+        public async Task Login(string? client_id)
         {
-            await HttpContext.ChallengeAsync(DomainConstants.IdsrvDefaultAuthenticationScheme,
-                new AuthenticationProperties()
-                {
-                    RedirectUri = "/"
-                });
+            var authProperties = new AuthenticationProperties()
+            {
+                RedirectUri = "/"
+            };
+
+            if (!string.IsNullOrEmpty(client_id))
+            {
+                authProperties.Items.Add("client_id", client_id);
+            }
+
+            await HttpContext.ChallengeAsync(DomainConstants.IdsrvDefaultAuthenticationScheme, authProperties);
         }
 
         [HttpPost]
@@ -48,7 +54,7 @@ namespace ClientApplication.Controllers
         public async Task Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            await HttpContext.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(DomainConstants.IdsrvDefaultAuthenticationScheme);
 
             //Important, this method should never return anything.
         }

@@ -107,6 +107,62 @@ public static class Config
             //Used for AddOpenIdConnect authentication for the localhost domain
             new Client
             {
+                ClientId = "extra-client",
+                ClientName = "Extra demo client",
+
+                RedirectUris = new List<string>()
+                {
+                    "https://localhost/signin-oidc",
+                    "https://localhost:5001/signin-oidc",
+                    "http://localhost/signin-oidc",
+                    "http://localhost:5000/signin-oidc"
+                },
+
+                PostLogoutRedirectUris = new List<string>()
+                {
+                    "https://localhost/signout-callback-oidc",
+                    "https://localhost:5001/signout-callback-oidc"
+                },
+
+                ClientSecrets = { new Secret("secret".Sha256()) },
+                RequireConsent = false,
+                AllowRememberConsent=true,
+                AllowedGrantTypes = GrantTypes.CodeAndClientCredentials.Union([OidcConstants.GrantTypes.TokenExchange]).ToList(),
+                AlwaysIncludeUserClaimsInIdToken = true,
+
+                RequirePkce = false,
+                AllowedScopes =
+                {
+                    //Standard scopes
+                    IdentityServerConstants.StandardScopes.OpenId,
+                    IdentityServerConstants.StandardScopes.Email,
+                    IdentityServerConstants.StandardScopes.Profile,
+                    IdentityServerConstants.StandardScopes.Phone,
+                    IdentityServerConstants.StandardScopes.OfflineAccess,
+                    "employee_info",
+                    $"{DomainConstants.DomainPrefix}",
+                    $"{DomainConstants.DomainPrefix}park",
+                    $"{DomainConstants.DomainPrefix}member",
+                    $"{DomainConstants.DomainPrefix}bonus",
+                    "api"
+                },
+
+                AllowOfflineAccess = true,
+                RefreshTokenUsage = TokenUsage.OneTimeOnly,
+                RefreshTokenExpiration = TokenExpiration.Sliding,
+
+
+                AccessTokenLifetime = 3600,      //1 hour
+                AlwaysSendClientClaims = true
+
+            },
+            
+            //Client application for the Introduction to OpenID Connect and Oauth (1 day) course
+            //Authorization code flow + Refresh token,
+            //same as oidc-client, but with 15 second access token lifetime
+            //Used for AddOpenIdConnect authentication for the localhost domain
+            new Client
+            {
                 ClientId = "localhost-addoidc-client",
                 ClientName = "OIDC AddOpenIDConnect localtest.me demo client",
 
@@ -125,7 +181,7 @@ public static class Config
                 },
 
                 ClientSecrets = { new Secret("secret".Sha256()) },
-                RequireConsent = true,
+                RequireConsent = false,
                 AllowRememberConsent=true,
                 AllowedGrantTypes = GrantTypes.CodeAndClientCredentials.Union([OidcConstants.GrantTypes.TokenExchange]).ToList(),
                 AlwaysIncludeUserClaimsInIdToken = true,

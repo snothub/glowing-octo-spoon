@@ -17,16 +17,23 @@ else
         <a class="nav-link text-dark" href="/User/Register">Register</a>
     </li>
     <li class="nav-item">
-        <form  asp-controller="User" asp-action="Login" class="form-inline" method="post">
-            <button  type="submit" class="nav-link btn btn-link text-dark">Login</button>  
-        </form>
-      
-    </li>
-    <li class="nav-item">
         <form  asp-controller="User" asp-action="LoginAd" class="form-inline" method="post">
             <button  type="submit" class="nav-link btn btn-link text-dark">Login AD</button>  
         </form>
       
     </li>
 }
+<li class="nav-item">
+    <form  asp-controller="User" asp-action="Login" class="form-inline" method="post">
+        <button  type="submit" class="nav-link btn btn-link text-dark">Login regular</button>
+    </form>
+
+</li>
+<li class="nav-item">
+    <form  asp-controller="User" asp-action="Login" class="form-inline" method="post">
+        <input type="hidden" name="client_id" value="extra-client" />
+        <button  type="submit" class="nav-link btn btn-link text-dark">Login different client</button>
+    </form>
+
+</li>
 </ul>

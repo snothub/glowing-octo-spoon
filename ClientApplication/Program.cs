@@ -71,17 +71,48 @@ internal class Program
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 NameClaimType = JwtClaimTypes.Name,
-                RoleClaimType = JwtClaimTypes.Role
+                RoleClaimType = JwtClaimTypes.Role,
+                AudienceValidator = (audiences, securityToken, validationParameters) =>
+                {
+                    // Accept the configured client_id OR any dynamic client_id
+                    // In production, you may want to validate against a whitelist
+                    var validAudiences = new[] { "localhost-addoidc-client", "extra-client" };
+                    return audiences.Any(aud => validAudiences.Contains(aud));
+                }
             };
 
             options.Events.OnRedirectToIdentityProvider = context =>
             {
                 Log.Information("context.Properties: {Serialize}", JsonSerializer.Serialize(context.Properties));
+
                 if (context.Properties.Items.TryGetValue("idp", out var idp))
                 {
                     context.ProtocolMessage.AcrValues = $"idp:{idp}";
                 }
+
+                if (context.Properties.Items.TryGetValue("client_id", out var clientId))
+                {
+                    context.ProtocolMessage.ClientId = clientId;
+                }
+
                 context.ProtocolMessage.IssuerAddress =  $"{authority}/connect/authorize";
+                return Task.CompletedTask;
+            };
+
+            options.Events.OnAuthorizationCodeReceived = context =>
+            {
+                Log.Information("OnAuthorizationCodeReceived - Properties: {Serialize}", JsonSerializer.Serialize(context.Properties));
+
+                // Override token request client credentials if dynamic client_id was used
+                if (context.Properties.Items.TryGetValue("client_id", out var clientId))
+                {
+                    context.TokenEndpointRequest.ClientId = clientId;
+
+                    // If you need different client secrets per client, retrieve it here
+                    // For now, using the same secret - you may need to configure this differently
+                    context.TokenEndpointRequest.ClientSecret = context.Options.ClientSecret;
+                }
+
                 return Task.CompletedTask;
             };
 

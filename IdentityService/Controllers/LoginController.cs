@@ -1,21 +1,29 @@
+using System.Text.Json;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Test;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
+using Duende.IdentityServer.Stores;
+using Duende.IdentityModel;
+using Duende.IdentityServer.Extensions;
 
 namespace IdentityService.Controllers
 {
     public class LoginController : Controller
     {
+        private readonly IUserSession _userSession;
+        private readonly ISessionManagementService _sessionManagementService;
         private readonly ILogger<LoginController> _logger;
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IEventService _events;
         private readonly TestUserStore _users;
 
-        public LoginController(ILogger<LoginController> logger, IIdentityServerInteractionService interaction, IEventService events, TestUserStore? users = null)
+        public LoginController(IUserSession userSession, ISessionManagementService sessionManagementService, ILogger<LoginController> logger, IIdentityServerInteractionService interaction, IEventService events, TestUserStore? users = null)
         {
+            _userSession = userSession;
+            _sessionManagementService = sessionManagementService;
             _logger = logger;
             _interaction = interaction;
             _events = events;
@@ -36,6 +44,27 @@ namespace IdentityService.Controllers
             await HttpContext.SignOutAsync(DomainConstants.IdsrvDefaultAuthenticationScheme);
             return Redirect(logout.PostLogoutRedirectUri ?? "~/");
 
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        [HttpGet, Route("/login/session")]
+        public async Task<IActionResult> GetLoginSession()
+        {
+            var sq = new SessionQuery();
+//            var sq = new SessionQuery {SubjectId = "subjectId"};
+            var qr = await _sessionManagementService.QuerySessionsAsync(sq);
+            var sess = qr.Results.FirstOrDefault();
+            var clients = string.Join(',', sess!.ClientIds.ToArray());
+            return Ok(new { sess.SessionId, sess.SubjectId, Clients = clients });
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        [HttpGet, Route("/login/s1")]
+        public async Task<IActionResult> Session1()
+        {
+            await _userSession.AddClientIdAsync("m2m");
+            
+            return Ok(JsonSerializer.Serialize(await _userSession.GetClientListAsync()));
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
