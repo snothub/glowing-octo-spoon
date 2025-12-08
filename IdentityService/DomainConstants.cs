@@ -2,6 +2,22 @@
 
 namespace IdentityService;
 
+///
+/// Domain-wide constants
+/// 
+/// Can be extended in partial classes for different environments, e.g.
+/// DomainConstants.Local.cs
+/*
+namespace IdentityService;
+
+public  static partial class DomainConstants
+{
+    public const string Cid = "external-client-id";
+    public const string Cs = "some-client-secret";
+    public const string CAuth = "https://externaldomain.onmicrosoft.com/v2.0";   
+}
+*/
+
 public static partial class DomainConstants
 {
     public const string DomainPrefix = "agva";
