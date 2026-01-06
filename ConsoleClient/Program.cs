@@ -33,7 +33,7 @@ class Program
                 client.ClientId = DomainConstants.JwtClientId;
                 client.TokenEndpoint = "http://localhost:7000/connect/token";
                 client.DPoPJsonWebKey = DomainConstants.SigningJwk;
-                client.Scope = $"{DomainConstants.DomainPrefix}park {DomainConstants.DomainPrefix}member";
+                client.Scope = $"{DomainConstants.DomainPrefix}member";
             })
             ;
 

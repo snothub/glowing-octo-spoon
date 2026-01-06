@@ -30,6 +30,7 @@ public static partial class DomainConstants
     public const string JwtClientId = "jwt.client.sample";    
     public static JsonWebKey ClientJwk { get; set; }
     
-    public const string IdpAuthority = "http://localhost:7000";
+    public const string IdpAuthority = "https://login.local:7001";
+    public const string ApiRootUri = "https://api.local:7701";
     public static string SigningJwk { get; set; }
 }

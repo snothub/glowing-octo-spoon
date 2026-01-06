@@ -1,9 +1,7 @@
 using System.Text.Json;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
-using Duende.IdentityServer.Validation;
 using IdentityService;
 using IdentityService.Pages;
 using Microsoft.IdentityModel.Tokens;
@@ -19,6 +17,18 @@ Log.Logger = new LoggerConfiguration()
 Log.Information("Starting up");
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services
+    .AddCors(opt =>
+    {
+        opt.AddDefaultPolicy(policy =>
+        {
+            policy
+                .WithOrigins("https://login.local:8443")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
+    });
 
 builder.Host.UseSerilog((ctx, lc) => lc
     .MinimumLevel.Debug()
@@ -30,12 +40,15 @@ builder.Services.AddRazorPages();
 
 var isBuilder = builder.Services.AddIdentityServer(options =>
 {
-    options.Authentication.CookieAuthenticationScheme = DomainConstants.IdsrvDefaultAuthenticationScheme;
-    options.IssuerUri = "http://identity";
+    options.Authentication.CookieSameSiteMode = SameSiteMode.Strict;
+    options.Authentication.CheckSessionCookieSameSiteMode = SameSiteMode.Strict;
+    
+    options.IssuerUri = DomainConstants.IdpAuthority;
 
-    options.UserInteraction.ConsentUrl = Environment.GetEnvironmentVariable("IDP_CONSENTURL") ?? "http://localhost:8001/consent";
+    options.UserInteraction.ConsentUrl = Environment.GetEnvironmentVariable("IDP_CONSENTURL") ?? "/ui/consent";
     options.UserInteraction.LoginUrl = Environment.GetEnvironmentVariable("IDP_LOGINURL") ?? "/ui/login";
     options.UserInteraction.LogoutUrl = Environment.GetEnvironmentVariable("IDP_LOGOUTURL") ?? "/ui/logout";
+    options.UserInteraction.AllowOriginInReturnUrl = true;
     options.Events.RaiseErrorEvents = true;
     options.Events.RaiseInformationEvents = true;
     options.Events.RaiseFailureEvents = true;
@@ -55,11 +68,12 @@ var isBuilder = builder.Services.AddIdentityServer(options =>
 })
 .AddJwtBearerClientAuthentication()
 .AddTestUsers(TestUsers.Users) 
+.AddRedirectUriValidator<AllowAnyRedirectUriValidator>()
 .AddServerSideSessions()
     ;
 
-isBuilder.Services.AddTransient<IReturnUrlParser, OidcReturnUrlParser>();
-isBuilder.Services.AddTransient<ICustomAuthorizeRequestValidator, DomainCustomAuthorizeRequestValidator>();
+// isBuilder.Services.AddTransient<IReturnUrlParser, OidcReturnUrlParser>();
+// isBuilder.Services.AddTransient<ICustomAuthorizeRequestValidator, DomainCustomAuthorizeRequestValidator>();
 
 // in-memory, code config
 isBuilder.AddInMemoryIdentityResources(Config.IdentityResources);
@@ -73,13 +87,6 @@ isBuilder.AddInMemoryClients(clients);
 isBuilder.Services.AddKeyedTransient<IResourceStore, DomainResourceStore>(DomainConstants.KeyedService);
 
 builder.Services.AddAuthentication()
-    .AddCookie(DomainConstants.IdsrvDefaultAuthenticationScheme, options => {
-        options.SlidingExpiration = true;
-    })
-    .AddCookie(DomainConstants.ExternalScheme, options => {
-        options.Cookie.Name = DomainConstants.ExternalScheme;
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
-    })
     .AddOpenIdConnect(DomainConstants.AdAuthenticationScheme, "Microsoft Entra ID", options =>
     {
         options.SignInScheme = DomainConstants.ExternalScheme;
@@ -98,6 +105,14 @@ var app = builder.Build();
 
 app.UseDeveloperExceptionPage();
 
+app.UseCors(p =>
+{
+    p.WithOrigins("https://login.local:8443");
+    p.AllowAnyHeader();
+    p.AllowAnyMethod();
+    p.AllowCredentials();
+});
+
 app.UseSerilogRequestLogging();
 
 app.UseStaticFiles();
@@ -106,12 +121,6 @@ app.UseRouting();
 app.MapControllers();
 
 app.UseIdentityServer();
-app.UseCors(p =>
-{
-    p.WithOrigins("http://localhost:3001");
-    p.AllowAnyHeader();
-    p.AllowCredentials();
-});
 
 app.UseAuthorization();
 
@@ -165,7 +174,6 @@ void HandleJwt(IConfiguration configuration, List<Client> list)
                 $"{DomainConstants.DomainPrefix}",
                 $"{DomainConstants.DomainPrefix}park",
                 $"{DomainConstants.DomainPrefix}member",
-                $"{DomainConstants.DomainPrefix}bonus",
                 "api"
             },
             AccessTokenLifetime = 3600,      //1 hour

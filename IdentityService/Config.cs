@@ -65,7 +65,7 @@ public static class Config
             new ApiScope("scope1"),
             new ApiScope("scope2"),
             new ApiScope($"{DomainConstants.DomainPrefix}park") {Description = $"{DomainConstants.DomainPrefix} parking"},
-            new ApiScope($"{DomainConstants.DomainPrefix}bonus") {Description = $"{DomainConstants.DomainPrefix} bonus"},
+            new ApiScope($"{DomainConstants.DomainPrefix}b0nus") {Description = $"{DomainConstants.DomainPrefix} b0nus"},
             new ApiScope($"{DomainConstants.DomainPrefix}member") {Description = $"{DomainConstants.DomainPrefix} member", Emphasize = true},
         };
 
@@ -93,12 +93,28 @@ public static class Config
 
                 AllowedGrantTypes = GrantTypes.Code.Union([OidcConstants.GrantTypes.TokenExchange]).ToList(),
 
-                RedirectUris = { "https://localhost:44300/signin-oidc" },
+                RedirectUris =
+                {
+                        "http://client.local/frontend1/signin-oidc"
+                },
                 FrontChannelLogoutUri = "https://localhost:44300/signout-oidc",
                 PostLogoutRedirectUris = { "https://localhost:44300/signout-callback-oidc" },
 
                 AllowOfflineAccess = true,
-                AllowedScopes = { "openid", "profile", "scope2" }
+                AllowedScopes =
+                {
+                    //Standard scopes
+                    IdentityServerConstants.StandardScopes.OpenId,
+                    IdentityServerConstants.StandardScopes.Email,
+                    IdentityServerConstants.StandardScopes.Profile,
+                    IdentityServerConstants.StandardScopes.Phone,
+                    IdentityServerConstants.StandardScopes.OfflineAccess,
+                    "employee_info",
+                    $"{DomainConstants.DomainPrefix}",
+                    $"{DomainConstants.DomainPrefix}park",
+                    $"{DomainConstants.DomainPrefix}member",
+                    "api"
+                }
             },
             
             //Client application for the Introduction to OpenID Connect and Oauth (1 day) course
@@ -112,16 +128,14 @@ public static class Config
 
                 RedirectUris = new List<string>()
                 {
-                    "https://localhost/signin-oidc",
-                    "https://localhost:5001/signin-oidc",
-                    "http://localhost/signin-oidc",
-                    "http://localhost:5000/signin-oidc"
+                    "https://client.local:5001/signin-oidc",
+                    "http://client.local:5000/signin-oidc"
                 },
 
                 PostLogoutRedirectUris = new List<string>()
                 {
-                    "https://localhost/signout-callback-oidc",
-                    "https://localhost:5001/signout-callback-oidc"
+                    "https://client.local/signout-callback-oidc",
+                    "https://client.local:5001/signout-callback-oidc"
                 },
 
                 ClientSecrets = { new Secret("secret".Sha256()) },
@@ -143,7 +157,6 @@ public static class Config
                     $"{DomainConstants.DomainPrefix}",
                     $"{DomainConstants.DomainPrefix}park",
                     $"{DomainConstants.DomainPrefix}member",
-                    $"{DomainConstants.DomainPrefix}bonus",
                     "api"
                 },
 
@@ -168,10 +181,9 @@ public static class Config
 
                 RedirectUris = new List<string>()
                 {
-                    "https://localhost/signin-oidc",
-                    "https://localhost:5001/signin-oidc",
-                    "http://localhost/signin-oidc",
-                    "http://localhost:5000/signin-oidc"
+                    "http://client.local:5000/frontend3/signin-oidc",
+                    "http://client.local:5001/signin-oidc",
+                    "http://client.local:5000/signin-oidc"
                 },
 
                 PostLogoutRedirectUris = new List<string>()
@@ -199,8 +211,7 @@ public static class Config
                     $"{DomainConstants.DomainPrefix}",
                     $"{DomainConstants.DomainPrefix}park",
                     $"{DomainConstants.DomainPrefix}member",
-                    $"{DomainConstants.DomainPrefix}bonus",
-                    "api"
+                    "scope1"
                 },
 
                 AllowOfflineAccess = true,

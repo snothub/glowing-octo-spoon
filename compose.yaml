@@ -17,32 +17,52 @@ services:
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/aspnetcore-dev-cert.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=MyPw123
       - IDP_AUTHORITY=${IDP_AUTHORITY}
+    extra_hosts:
+      - "login.local:host-gateway"
+      - "client.local:host-gateway"
+      - "bff.local:host-gateway"
+      - "api.local:host-gateway"
   
   identity:
     build:
       context: .
       dockerfile: Dockerfile_Identity
     ports:
-      - "${IDP_AUTHORITY_PORT}:80"
-      - "7001:443"
+      - "7000:80"
+      - "${IDP_AUTHORITY_PORT}:443"
     volumes:
       - ./aspnetcore-dev-cert.pfx:/app/aspnetcore-dev-cert.pfx  # Mount certificate into /app
     environment:
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/aspnetcore-dev-cert.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=MyPw123
       - IDP_LOGINURL=${IDP_LOGINAPP}/login
-      - IDP_LOGOUTURL=/logout
+      - IDP_LOGOUTURL=${IDP_AUTHORITY}/logout
       - IDP_CONSENTURL=${IDP_LOGINAPP}/consent
       - LogLevel=Debug
+    extra_hosts:
+      - "login.local:host-gateway"
+      - "client.local:host-gateway"
+      - "bff.local:host-gateway"
+      - "api.local:host-gateway"
   
   api:
     build:
       context: .
       dockerfile: Dockerfile_Api
+    volumes:
+      - ./aspnetcore-dev-cert.pfx:/app/aspnetcore-dev-cert.pfx  # Mount certificate into /app
     ports:
-      - "${IDP_API_PORT}:80"
+      - "7700:80"
+      - "${IDP_API_PORT}:443"
     environment:
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/aspnetcore-dev-cert.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=MyPw123
       - LogLevel=Debug
+    extra_hosts:
+      - "login.local:host-gateway"
+      - "client.local:host-gateway"
+      - "bff.local:host-gateway"
+      - "api.local:host-gateway"
 
   login-app:
     build:
@@ -51,6 +71,14 @@ services:
       args:
         VITE_API_URL: ${IDP_AUTHORITY}
     ports:
-      - "${IDP_LOGINAPP_PORT}:80"
+      - "80:80"
+      - "${IDP_LOGINAPP_PORT}:443"
     depends_on:
       - identity
+    volumes:
+      - ./aspnetcore-dev-cert.pfx:/app/aspnetcore-dev-cert.pfx
+    extra_hosts:
+      - "login.local:host-gateway"
+      - "client.local:host-gateway"
+      - "bff.local:host-gateway"
+      - "api.local:host-gateway"

@@ -47,7 +47,7 @@ public class TokenExClient : BackgroundService
             Address = $"{DomainConstants.IdpAuthority}/connect/token",
             ClientId = "localhost-addoidc-client",
             ClientSecret = "secret",
-            Scope = $"{DomainConstants.DomainPrefix}park {DomainConstants.DomainPrefix}bonus",
+            Scope = $"{DomainConstants.DomainPrefix}park",
         });
 
         if (response.IsError)

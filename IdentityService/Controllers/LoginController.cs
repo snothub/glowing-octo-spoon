@@ -8,9 +8,11 @@ using Microsoft.AspNetCore.Mvc;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
+using Microsoft.AspNetCore.Cors;
 
 namespace IdentityService.Controllers
 {
+    [DisableCors]
     public class LoginController : Controller
     {
         private readonly IUserSession _userSession;
@@ -119,8 +121,8 @@ namespace IdentityService.Controllers
             var context = await _interaction.GetAuthorizationContextAsync(request.ReturnUrl);
             if (context is null)
             {
-                _logger.LogWarning("Invalid return URL");
-                return BadRequest(new { error = "Invalid return URL" });
+                _logger.LogWarning("Invalid return URL - {Uri}", request.ReturnUrl);
+                return BadRequest(new { error = $"Invalid return URL: {request.ReturnUrl}" });
             }
 
             if (!_users.ValidateCredentials(request.Username, request.Password))

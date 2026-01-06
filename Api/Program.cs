@@ -1,5 +1,7 @@
 using Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 using IdentityService;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 
@@ -21,12 +23,16 @@ builder.Services.AddCors();
 builder.Services.AddAuthentication("token")
     .AddJwtBearer("token", options =>
     {
-        options.Authority = "http://identity";
+        options.Authority = DomainConstants.IdpAuthority;
+        options.MetadataAddress = $"{DomainConstants.IdpAuthority}/.well-known/openid-configuration";
         options.TokenValidationParameters.ValidateAudience = false;
         options.MapInboundClaims = false;
-        options.RequireHttpsMetadata = false;
+        options.RequireHttpsMetadata = DomainConstants.IdpAuthority.StartsWith("https://");
 
         options.TokenValidationParameters.ValidTypes = ["at+jwt"];
+        options.TokenValidationParameters.ValidIssuer = DomainConstants.IdpAuthority;
+        options.TokenValidationParameters.SignatureValidator = (token, validationparameters)
+            => new JsonWebToken(token);
     });
 
 // // layers DPoP onto the "token" scheme above
@@ -49,7 +55,6 @@ var app = builder.Build();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers().RequireAuthorization();
 
 app.Run();

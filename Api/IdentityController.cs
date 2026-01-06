@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api;
 
-[Route("/api")]
+[Route("/")]
 public class IdentityController : ControllerBase
 {
     private readonly ILogger<IdentityController> _logger;
@@ -16,13 +16,28 @@ public class IdentityController : ControllerBase
     [HttpGet]
     public ActionResult Get()
     {
+        var title = "FIRST";
         var claims = User.Claims.Select(c => new { c.Type, c.Value });
         _logger.LogInformation("claims: {claims}", claims);
 
         var scheme = GetAuthorizationScheme(Request);
         var proofToken = GetDPoPProofToken(Request);
 
-        return new JsonResult(new { scheme, proofToken, claims });
+        return new JsonResult(new { title, scheme, proofToken, claims });
+    }
+
+    [HttpGet]
+    [Route("second")]
+    public ActionResult GetSecond()
+    {
+        var title = "SECOND";
+        var claims = User.Claims.Select(c => new { c.Type, c.Value });
+        _logger.LogInformation("claims: {claims}", claims);
+
+        var scheme = GetAuthorizationScheme(Request);
+        var proofToken = GetDPoPProofToken(Request);
+
+        return new JsonResult(new { second = title, scheme, proofToken, claims });
     }
 
     public static string? GetAuthorizationScheme(HttpRequest request)
