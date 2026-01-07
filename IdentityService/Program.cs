@@ -38,11 +38,19 @@ builder.Host.UseSerilog((ctx, lc) => lc
 
 builder.Services.AddRazorPages();
 
+// Configure cookie policy for cross-domain scenarios (DEV ONLY)
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.MinimumSameSitePolicy = SameSiteMode.None;
+    options.Secure = CookieSecurePolicy.Always;
+});
+
 var isBuilder = builder.Services.AddIdentityServer(options =>
 {
-    options.Authentication.CookieSameSiteMode = SameSiteMode.Strict;
-    options.Authentication.CheckSessionCookieSameSiteMode = SameSiteMode.Strict;
-    
+    // Use SameSite=None for cross-domain scenarios (DEV ONLY)
+    options.Authentication.CookieSameSiteMode = SameSiteMode.None;
+    options.Authentication.CheckSessionCookieSameSiteMode = SameSiteMode.None;
+
     options.IssuerUri = DomainConstants.IdpAuthority;
 
     options.UserInteraction.ConsentUrl = Environment.GetEnvironmentVariable("IDP_CONSENTURL") ?? "/ui/consent";
@@ -105,13 +113,9 @@ var app = builder.Build();
 
 app.UseDeveloperExceptionPage();
 
-app.UseCors(p =>
-{
-    p.WithOrigins("https://login.local:8443");
-    p.AllowAnyHeader();
-    p.AllowAnyMethod();
-    p.AllowCredentials();
-});
+app.UseCors();
+
+app.UseCookiePolicy();
 
 app.UseSerilogRequestLogging();
 

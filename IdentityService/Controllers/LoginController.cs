@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Cors;
 
 namespace IdentityService.Controllers
 {
-    [DisableCors]
+    [EnableCors]
     public class LoginController : Controller
     {
         private readonly IUserSession _userSession;

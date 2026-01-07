@@ -18,9 +18,9 @@ services:
       - ASPNETCORE_Kestrel__Certificates__Default__Password=MyPw123
       - IDP_AUTHORITY=${IDP_AUTHORITY}
     extra_hosts:
+      - "idp.local:host-gateway"
       - "login.local:host-gateway"
       - "client.local:host-gateway"
-      - "bff.local:host-gateway"
       - "api.local:host-gateway"
   
   identity:
@@ -42,7 +42,7 @@ services:
     extra_hosts:
       - "login.local:host-gateway"
       - "client.local:host-gateway"
-      - "bff.local:host-gateway"
+      - "idp.local:host-gateway"
       - "api.local:host-gateway"
   
   api:
@@ -61,7 +61,7 @@ services:
     extra_hosts:
       - "login.local:host-gateway"
       - "client.local:host-gateway"
-      - "bff.local:host-gateway"
+      - "idp.local:host-gateway"
       - "api.local:host-gateway"
 
   login-app:
@@ -80,5 +80,5 @@ services:
     extra_hosts:
       - "login.local:host-gateway"
       - "client.local:host-gateway"
-      - "bff.local:host-gateway"
+      - "idp.local:host-gateway"
       - "api.local:host-gateway"
