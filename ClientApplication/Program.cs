@@ -7,7 +7,6 @@ using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Yarp;
 using IdentityService;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.Extensions.Http;
 using Microsoft.IdentityModel.Logging;
 using Serilog;
 
@@ -57,14 +56,15 @@ internal class Program
                 new BffFrontend(BffFrontendName.Parse("oidc-client"))
                     .WithOpenIdConnectOptions(options =>
                     {
+                        options.SaveTokens = true;
                         options.ClientId = "localhost-addoidc-client";
                         options.ClientSecret = "secret";
                         options.Scope.Clear();
                         options.Scope.Add("openid");
                         options.Scope.Add("profile");
                         options.Scope.Add("scope1");
-                        options.SaveTokens = true;
-                        options.AuthenticationMethod = OpenIdConnectRedirectBehavior.FormPost;
+                        options.Scope.Add("offline_access");
+                        
                     })
                     .MapToPath("/frontend3")
                     .WithRemoteApis(
@@ -80,26 +80,6 @@ internal class Program
             .AddRemoteApis()
             ;
 
-        // Configure all HttpClient instances to ignore certificate validation (DEV ONLY)
-        builder.Services.ConfigureAll<HttpClientFactoryOptions>(options =>
-        {
-            options.HttpMessageHandlerBuilderActions.Add(handlerBuilder =>
-            {
-                handlerBuilder.PrimaryHandler = new CertificateValidationHandler();
-            });
-        });
-
-        // Configure YARP's forwarder to use our certificate validation handler
-        // Remove any existing registration first, then add ours
-        var forwarderFactoryDescriptor = builder.Services.FirstOrDefault(d =>
-            d.ServiceType == typeof(Yarp.ReverseProxy.Forwarder.IForwarderHttpClientFactory));
-        if (forwarderFactoryDescriptor != null)
-        {
-            builder.Services.Remove(forwarderFactoryDescriptor);
-        }
-        builder.Services.AddSingleton<Yarp.ReverseProxy.Forwarder.IForwarderHttpClientFactory>(
-            new CustomForwarderHttpClientFactory());
-
         builder.Services.AddAuthorization();
 
         var app = builder.Build();
@@ -110,8 +90,8 @@ internal class Program
 
         app.UseStaticFiles();
 
-        app.UseRouting();
         app.UseAuthentication();
+        app.UseRouting();
 
         app.UseBff();
 

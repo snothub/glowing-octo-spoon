@@ -17,7 +17,6 @@ namespace ClientApplication.Controllers
     public class UserController : Controller
     {
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task Login(string? client_id)
         {
             var authProperties = new AuthenticationProperties()
@@ -34,7 +33,6 @@ namespace ClientApplication.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task LoginAd()
         {
             await HttpContext.ChallengeAsync(DomainConstants.IdsrvDefaultAuthenticationScheme,
@@ -50,7 +48,6 @@ namespace ClientApplication.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);

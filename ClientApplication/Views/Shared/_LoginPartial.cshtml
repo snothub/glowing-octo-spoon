@@ -24,11 +24,14 @@ else
     </li>
 }
 <li class="nav-item">
+    <a class="nav-link btn btn-link text-dark" href="#" onclick="window.location.href = window.location.origin + window.location.pathname + '/bff/login'; return false;">Login regular</a>
+</li>
+@* <li class="nav-item">
     <form  asp-controller="User" asp-action="Login" class="form-inline" method="post">
         <button  type="submit" class="nav-link btn btn-link text-dark">Login regular</button>
     </form>
 
-</li>
+</li> *@
 <li class="nav-item">
     <form  asp-controller="User" asp-action="Login" class="form-inline" method="post">
         <input type="hidden" name="client_id" value="extra-client" />
