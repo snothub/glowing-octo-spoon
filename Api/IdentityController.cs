@@ -41,6 +41,14 @@ public class IdentityController : ControllerBase
         return new JsonResult(new { second = title, scheme, proofToken, claims });
     }
 
+    [HttpGet, AllowAnonymous]
+    [Route("third")]
+    public ActionResult GetThird()
+    {
+        var title = "THIRD";
+        return new JsonResult(new {  title });
+    }
+
     public static string? GetAuthorizationScheme(HttpRequest request)
     {
         return request.Headers.Authorization.FirstOrDefault()?.Split(' ', System.StringSplitOptions.RemoveEmptyEntries)[0];
