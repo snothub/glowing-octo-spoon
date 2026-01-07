@@ -80,6 +80,16 @@ internal class Program
             .AddRemoteApis()
             ;
 
+        // Configure YARP to bypass SSL certificate validation (DEV ONLY)
+        var forwarderFactoryDescriptor = builder.Services.FirstOrDefault(d =>
+            d.ServiceType == typeof(Yarp.ReverseProxy.Forwarder.IForwarderHttpClientFactory));
+        if (forwarderFactoryDescriptor != null)
+        {
+            builder.Services.Remove(forwarderFactoryDescriptor);
+        }
+        builder.Services.AddSingleton<Yarp.ReverseProxy.Forwarder.IForwarderHttpClientFactory>(
+            new CustomForwarderHttpClientFactory());
+
         builder.Services.AddAuthorization();
 
         var app = builder.Build();
