@@ -62,6 +62,8 @@ public static class Config
     public static IEnumerable<ApiScope> ApiScopes =>
         new ApiScope[]
         {
+            new ApiScope("api"),
+            new ApiScope("api1"),
             new ApiScope("scope1"),
             new ApiScope("scope2"),
             new ApiScope($"{DomainConstants.DomainPrefix}park") {Description = $"{DomainConstants.DomainPrefix} parking"},
@@ -113,7 +115,8 @@ public static class Config
                     $"{DomainConstants.DomainPrefix}",
                     $"{DomainConstants.DomainPrefix}park",
                     $"{DomainConstants.DomainPrefix}member",
-                    "api"
+                    "api",
+                    "api1"
                 }
             },
             
@@ -157,7 +160,8 @@ public static class Config
                     $"{DomainConstants.DomainPrefix}",
                     $"{DomainConstants.DomainPrefix}park",
                     $"{DomainConstants.DomainPrefix}member",
-                    "api"
+                    "api",
+                    "api1"
                 },
 
                 AllowOfflineAccess = true,

@@ -28,6 +28,7 @@ public static partial class DomainConstants
     public const string KeyedService = "CustomStore";    
 
     public const string JwtClientId = "jwt.client.sample";    
+    public const string ClientId = "extra-client";    
     public static JsonWebKey ClientJwk { get; set; }
     
     public const string IdpAuthority = "https://idp.local:7001";

@@ -2,6 +2,66 @@
 # docker compose build identity; docker compose up -d --force-recreate identity
 
 services:
+  js-client:
+    build:
+      context: .
+      dockerfile: Dockerfile_JavaScriptClient
+    ports:
+      - "6003:443"
+    depends_on:
+      - identity
+    volumes:
+      - ./aspnetcore-dev-cert.pfx:/app/aspnetcore-dev-cert.pfx  # Mount certificate into /app
+    environment:
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/aspnetcore-dev-cert.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=MyPw123
+      - IDP_AUTHORITY=${IDP_AUTHORITY}
+    extra_hosts:
+      - "idp.local:host-gateway"
+      - "login.local:host-gateway"
+      - "client.local:host-gateway"
+      - "api.local:host-gateway"
+  
+  js-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile_FrontendHost
+    ports:
+      - "6001:443"
+    depends_on:
+      - identity
+    volumes:
+      - ./aspnetcore-dev-cert.pfx:/app/aspnetcore-dev-cert.pfx  # Mount certificate into /app
+    environment:
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/aspnetcore-dev-cert.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=MyPw123
+      - IDP_AUTHORITY=${IDP_AUTHORITY}
+    extra_hosts:
+      - "idp.local:host-gateway"
+      - "login.local:host-gateway"
+      - "client.local:host-gateway"
+      - "api.local:host-gateway"
+  
+  js-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile_BackendApiHost
+    ports:
+      - "6002:443"
+    depends_on:
+      - identity
+    volumes:
+      - ./aspnetcore-dev-cert.pfx:/app/aspnetcore-dev-cert.pfx  # Mount certificate into /app
+    environment:
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/aspnetcore-dev-cert.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=MyPw123
+      - IDP_AUTHORITY=${IDP_AUTHORITY}
+    extra_hosts:
+      - "idp.local:host-gateway"
+      - "login.local:host-gateway"
+      - "client.local:host-gateway"
+      - "api.local:host-gateway"
+  
   client:
     build:
       context: .

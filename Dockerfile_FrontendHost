@@ -1,0 +1,29 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+
+WORKDIR /src
+
+# Copy and restore FrontendHost project
+COPY JsBffSample/FrontendHost/*.csproj JsBffSample/FrontendHost/
+RUN dotnet restore JsBffSample/FrontendHost/FrontendHost.csproj
+
+# Copy the remaining code
+COPY JsBffSample/FrontendHost/ JsBffSample/FrontendHost/
+COPY IdentityService/DomainConstants*.cs IdentityService/
+COPY ClientApplication/BackChannelListener.cs ClientApplication/
+COPY ClientApplication/CustomForwarderHttpClientFactory.cs ClientApplication/
+
+RUN dotnet publish JsBffSample/FrontendHost/FrontendHost.csproj -c Release -o /app
+
+# Phase #2, Build final image
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS release
+
+WORKDIR /app
+
+COPY --from=build /app .
+
+EXPOSE 80 443
+
+ENV ASPNETCORE_URLS=http://+:80;https://+:443
+
+ENTRYPOINT ["dotnet", "./FrontendHost.dll"]

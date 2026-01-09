@@ -1,0 +1,29 @@
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+
+WORKDIR /src
+
+# Copy and restore JavaScriptClient project
+COPY JavaScriptClient/*.csproj JavaScriptClient/
+RUN dotnet restore JavaScriptClient/JavaScriptClient.csproj
+
+# Copy the remaining code
+COPY JavaScriptClient/ JavaScriptClient/
+COPY IdentityService/DomainConstants*.cs IdentityService/
+COPY ClientApplication/BackChannelListener.cs ClientApplication/
+COPY ClientApplication/CustomForwarderHttpClientFactory.cs ClientApplication/
+
+RUN dotnet publish JavaScriptClient/JavaScriptClient.csproj -c Release -o /app
+
+# Phase #2, Build final image
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS release
+
+WORKDIR /app
+
+COPY --from=build /app .
+
+EXPOSE 80 443
+
+ENV ASPNETCORE_URLS=http://+:80;https://+:443
+
+ENTRYPOINT ["dotnet", "./JavaScriptClient.dll"]

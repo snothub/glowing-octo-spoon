@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+	<ImplicitUsings>true</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Duende.BFF" Version="3.0.0" />
+    <PackageReference Include="Duende.BFF.Yarp" Version="3.0.0" />
+    
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.6" />
+    
+    <PackageReference Include="Serilog" Version="3.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\ClientApplication\BackChannelListener.cs">
+      <Link>BackChannelListener.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ClientApplication\CustomForwarderHttpClientFactory.cs">
+      <Link>CustomForwarderHttpClientFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\..\IdentityService\DomainConstants.cs">
+      <Link>DomainConstants.cs</Link>
+    </Compile>
+  </ItemGroup>
+
+</Project>
