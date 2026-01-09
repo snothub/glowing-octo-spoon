@@ -1,6 +1,17 @@
 # docker compose build client --no-cache; docker compose up -d --force-recreate client
 # docker compose build identity; docker compose up -d --force-recreate identity
 
+# Reusable configuration blocks
+x-common-extra-hosts: &common-extra-hosts
+  - "idp.local:host-gateway"
+  - "login.local:host-gateway"
+  - "client.local:host-gateway"
+  - "api.local:host-gateway"
+
+x-common-cert-env: &common-cert-env
+  ASPNETCORE_Kestrel__Certificates__Default__Path: /app/aspnetcore-dev-cert.pfx
+  ASPNETCORE_Kestrel__Certificates__Default__Password: MyPw123
+
 services:
   js-client:
     build:
@@ -13,15 +24,10 @@ services:
     volumes:
       - ./aspnetcore-dev-cert.pfx:/app/aspnetcore-dev-cert.pfx  # Mount certificate into /app
     environment:
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/aspnetcore-dev-cert.pfx
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=MyPw123
-      - IDP_AUTHORITY=${IDP_AUTHORITY}
-    extra_hosts:
-      - "idp.local:host-gateway"
-      - "login.local:host-gateway"
-      - "client.local:host-gateway"
-      - "api.local:host-gateway"
-  
+      <<: *common-cert-env
+      IDP_AUTHORITY: ${IDP_AUTHORITY}
+    extra_hosts: *common-extra-hosts
+
   js-frontend:
     build:
       context: .
@@ -33,15 +39,10 @@ services:
     volumes:
       - ./aspnetcore-dev-cert.pfx:/app/aspnetcore-dev-cert.pfx  # Mount certificate into /app
     environment:
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/aspnetcore-dev-cert.pfx
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=MyPw123
-      - IDP_AUTHORITY=${IDP_AUTHORITY}
-    extra_hosts:
-      - "idp.local:host-gateway"
-      - "login.local:host-gateway"
-      - "client.local:host-gateway"
-      - "api.local:host-gateway"
-  
+      <<: *common-cert-env
+      IDP_AUTHORITY: ${IDP_AUTHORITY}
+    extra_hosts: *common-extra-hosts
+
   js-backend:
     build:
       context: .
@@ -53,15 +54,10 @@ services:
     volumes:
       - ./aspnetcore-dev-cert.pfx:/app/aspnetcore-dev-cert.pfx  # Mount certificate into /app
     environment:
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/aspnetcore-dev-cert.pfx
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=MyPw123
-      - IDP_AUTHORITY=${IDP_AUTHORITY}
-    extra_hosts:
-      - "idp.local:host-gateway"
-      - "login.local:host-gateway"
-      - "client.local:host-gateway"
-      - "api.local:host-gateway"
-  
+      <<: *common-cert-env
+      IDP_AUTHORITY: ${IDP_AUTHORITY}
+    extra_hosts: *common-extra-hosts
+
   client:
     build:
       context: .
@@ -73,15 +69,10 @@ services:
     volumes:
       - ./aspnetcore-dev-cert.pfx:/app/aspnetcore-dev-cert.pfx  # Mount certificate into /app
     environment:
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/aspnetcore-dev-cert.pfx
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=MyPw123
-      - IDP_AUTHORITY=${IDP_AUTHORITY}
-    extra_hosts:
-      - "idp.local:host-gateway"
-      - "login.local:host-gateway"
-      - "client.local:host-gateway"
-      - "api.local:host-gateway"
-  
+      <<: *common-cert-env
+      IDP_AUTHORITY: ${IDP_AUTHORITY}
+    extra_hosts: *common-extra-hosts
+
   identity:
     build:
       context: .
@@ -91,18 +82,13 @@ services:
     volumes:
       - ./aspnetcore-dev-cert.pfx:/app/aspnetcore-dev-cert.pfx  # Mount certificate into /app
     environment:
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/aspnetcore-dev-cert.pfx
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=MyPw123
-      - IDP_LOGINURL=${IDP_LOGINAPP}/login
-      - IDP_LOGOUTURL=${IDP_AUTHORITY}/logout
-      - IDP_CONSENTURL=${IDP_LOGINAPP}/consent
-      - LogLevel=Debug
-    extra_hosts:
-      - "login.local:host-gateway"
-      - "client.local:host-gateway"
-      - "idp.local:host-gateway"
-      - "api.local:host-gateway"
-  
+      <<: *common-cert-env
+      IDP_LOGINURL: ${IDP_LOGINAPP}/login
+      IDP_LOGOUTURL: ${IDP_AUTHORITY}/logout
+      IDP_CONSENTURL: ${IDP_LOGINAPP}/consent
+      LogLevel: Debug
+    extra_hosts: *common-extra-hosts
+
   api:
     build:
       context: .
@@ -112,14 +98,9 @@ services:
     ports:
       - "${IDP_API_PORT}:443"
     environment:
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/aspnetcore-dev-cert.pfx
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=MyPw123
-      - LogLevel=Debug
-    extra_hosts:
-      - "login.local:host-gateway"
-      - "client.local:host-gateway"
-      - "idp.local:host-gateway"
-      - "api.local:host-gateway"
+      <<: *common-cert-env
+      LogLevel: Debug
+    extra_hosts: *common-extra-hosts
 
   login-app:
     build:
@@ -133,8 +114,4 @@ services:
       - identity
     volumes:
       - ./aspnetcore-dev-cert.pfx:/app/aspnetcore-dev-cert.pfx
-    extra_hosts:
-      - "login.local:host-gateway"
-      - "client.local:host-gateway"
-      - "idp.local:host-gateway"
-      - "api.local:host-gateway"
+    extra_hosts: *common-extra-hosts
